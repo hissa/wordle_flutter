@@ -15,6 +15,18 @@ class MyWordleState extends State<WordlePage> {
   String _showText = "";
   String _tmpText = "";
   String _word = "";
+  List _worldleResults = [];
+
+  List _getWorldleResult(String inputWord, String answerWord){
+    return [0,1,2,0,1];
+  }
+
+  Color? _getMaterialColor(int result){
+    if(result == 0)return Colors.grey;
+    if(result == 1)return Colors.amber[300];
+    if(result == 2)return Colors.green[300];
+    return Colors.grey;
+  }
 
   void _handleChange(String value) {
     setState(() {
@@ -25,6 +37,7 @@ class MyWordleState extends State<WordlePage> {
   void _reflectionText() {
     setState(() {
       _showText = _tmpText;
+      _worldleResults = _getWorldleResult(_showText, _word);
     });
   }
 
@@ -94,7 +107,7 @@ class MyWordleState extends State<WordlePage> {
                   width: 40,
                   height: 40,
                   child: ColoredBox(
-                      color: Colors.yellow,
+                      color: _getMaterialColor(_worldleResults[i])!,
                       child: Text(_showText[i].toUpperCase())),
                 ),
               }
