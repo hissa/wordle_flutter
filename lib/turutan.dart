@@ -17,12 +17,13 @@ class MyWordleState extends State<WordlePage> {
   String _word = "";
 
   double _resultBoxWidth = 70;
-
   List _wordleResults = []; //１ゲーム5ターン分のデータが入る
-
   List _getWordleResult(String inputWord, String answerWord){
     return [0,1,2,0,1];
   }
+
+  int _maxChallengeCount = 5;
+  int _gameState = 0; //0:実行中、1:クリア,2:失敗
 
   Color? _getMaterialColor(int result){
     if(result == 0)return Colors.grey;
@@ -40,10 +41,55 @@ class MyWordleState extends State<WordlePage> {
   void _reflectionText() {
     setState(() {
       _showText = _tmpText;
-      _wordleResults.add(_getWordleResult(_showText, _word));
+      _PushInputAnswer();
     });
   }
 
+  bool _isClear(List _wordleResult){
+    return false;
+  }
+  void _PushInputAnswer(){
+    //5回目以降のチャレンジは弾く
+    if(_wordleResults.length >= _maxChallengeCount){
+      return;
+    }
+
+    _wordleResults.add(_getWordleResult(_showText, _word));
+    //クリアかどうか判定
+    if(_isClear(_wordleResults[_wordleResults.length - 1])){
+      _gameState = 1;
+      return;
+    }
+
+    //失敗判定
+    if(_wordleResults.length >= _maxChallengeCount){
+      _gameState = 2;
+      _showGameOverDialog();
+    }
+  }
+
+  void _showGameOverDialog(){
+    showDialog(
+      context: context,
+      builder: (_) {
+        return AlertDialog(
+          title: Text("タイトル"),
+          content: Text("メッセージメッセージメッセージメッセージメッセージメッセージ"),
+          actions: <Widget>[
+            // ボタン領域
+            FlatButton(
+              child: Text("Cancel"),
+              onPressed: () => Navigator.pop(context),
+            ),
+            FlatButton(
+              child: Text("OK"),
+              onPressed: () => Navigator.pop(context),
+            ),
+          ],
+        );
+      },
+    );
+  }
   void _getWord() async {
     final _httpLink =
         HttpLink("https://serene-garden-89220.herokuapp.com/query");
@@ -104,7 +150,6 @@ class MyWordleState extends State<WordlePage> {
               child: const Text("回答する")),
           Column(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            
             children: [
               for(var i = 0; i < _wordleResults.length; i++) ...{
                 Row(
@@ -118,7 +163,7 @@ class MyWordleState extends State<WordlePage> {
                             color: _getMaterialColor(_wordleResults[i][j])!,
                             child: Text(_showText[j].toUpperCase())),
                       ),
-                    }
+                    },
                   ],
                 ),
               }
