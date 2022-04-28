@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 import 'package:graphql/client.dart';
+import 'package:wordle_flutter/WordleApiClient.dart';
 
 class WordlePage extends StatefulWidget {
   const WordlePage({Key? key}) : super(key: key);
@@ -17,6 +18,14 @@ class MyWordleState extends State<WordlePage> {
   String _word = "";
 
   double _resultBoxWidth = 70;
+  Map<String,dynamic> _wordleAnswerData = {};
+  String _wordleAnswerMeaning(){
+    return _wordleAnswerData["mean"];
+  }
+  String _wordleAnswerWord(){
+    return _wordleAnswerData["word"];
+  }
+  
   List _wordleResults = []; //１ゲーム5ターン分のデータが入る
   List _getWordleResult(String inputWord, String answerWord){
     return [0,1,2,0,1];
@@ -24,6 +33,7 @@ class MyWordleState extends State<WordlePage> {
 
   int _maxChallengeCount = 5;
   int _gameState = 0; //0:実行中、1:クリア,2:失敗
+  int _characterCount = 4; //correctWordの文字数
 
   Color? _getMaterialColor(int result){
     if(result == 0)return Colors.grey;
@@ -91,34 +101,11 @@ class MyWordleState extends State<WordlePage> {
     );
   }
   void _getWord() async {
-    final _httpLink =
-        HttpLink("https://serene-garden-89220.herokuapp.com/query");
-// Graphql のクライアントを準備
-    final GraphQLClient client =
-        GraphQLClient(link: _httpLink, cache: GraphQLCache());
-
-    const String callUserList = r'''
-      correctWord(wordId: ) {
-        mean
-        word
-      }
-    ''';
-
-    final QueryOptions options = QueryOptions(document: gql(callUserList));
-
-    final QueryResult result = await client.query(options);
-
-    if (result.hasException) {
-      print(result.exception.toString());
-    }
-
-    print(result);
-
-    final data = result.data;
-    var uuid = Uuid();
-    var v1 = uuid.v1();
+    final _apiClient = WordleApiClient();
+    _wordleAnswerData = await _apiClient.getCorrectWordAsync();
     setState(() {
-      _word = v1;
+      _word = _wordleAnswerWord();
+      print(_word);
     });
   }
 
@@ -136,7 +123,7 @@ class MyWordleState extends State<WordlePage> {
                     MaterialStateProperty.all<Color>(Colors.blueGrey),
               ),
               onPressed: _getWord,
-              child: const Text("5文字の英単語")),
+              child: Text("$_characterCount 文字の英単語")),
           Text(_word),
           TextField(onChanged: (value) {
             _handleChange(value);
