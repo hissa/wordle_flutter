@@ -87,7 +87,7 @@ class MyWordleState extends State<WordlePage> {
                     MaterialStateProperty.all<Color>(Colors.blueGrey),
               ),
               onPressed: _getWord,
-              child: const Text("4文字の英単語")),
+              child: const Text("5文字の英単語")),
           Text(_word),
           TextField(onChanged: (value) {
             _handleChange(value);
