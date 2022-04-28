@@ -15,9 +15,12 @@ class MyWordleState extends State<WordlePage> {
   String _showText = "";
   String _tmpText = "";
   String _word = "";
-  List _worldleResults = [];
 
-  List _getWorldleResult(String inputWord, String answerWord){
+  double _resultBoxWidth = 70;
+
+  List _wordleResults = []; //１ゲーム5ターン分のデータが入る
+
+  List _getWordleResult(String inputWord, String answerWord){
     return [0,1,2,0,1];
   }
 
@@ -37,7 +40,7 @@ class MyWordleState extends State<WordlePage> {
   void _reflectionText() {
     setState(() {
       _showText = _tmpText;
-      _worldleResults = _getWorldleResult(_showText, _word);
+      _wordleResults.add(_getWordleResult(_showText, _word));
     });
   }
 
@@ -99,16 +102,24 @@ class MyWordleState extends State<WordlePage> {
               ),
               onPressed: _reflectionText,
               child: const Text("回答する")),
-          Row(
+          Column(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            
             children: [
-              for (var i = 0; i < _showText.length; i++) ...{
-                SizedBox(
-                  width: 40,
-                  height: 40,
-                  child: ColoredBox(
-                      color: _getMaterialColor(_worldleResults[i])!,
-                      child: Text(_showText[i].toUpperCase())),
+              for(var i = 0; i < _wordleResults.length; i++) ...{
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    for (var j = 0; j < _showText.length; j++) ...{
+                      SizedBox(
+                        width: _resultBoxWidth,
+                        height: _resultBoxWidth,
+                        child: ColoredBox(
+                            color: _getMaterialColor(_wordleResults[i][j])!,
+                            child: Text(_showText[j].toUpperCase())),
+                      ),
+                    }
+                  ],
                 ),
               }
             ],
